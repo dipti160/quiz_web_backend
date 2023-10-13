@@ -3,16 +3,13 @@ const User = require("../models/user");
 // Create a new user
 const createUser = async (req, res) => {
   try {
-    console.log(req.body);
     const filteredData = Object.fromEntries(
       Object.entries(req.body).filter(
         ([key, value]) => value !== "" || key == "confirmPassword"
       )
     );
     delete filteredData.confirmPassword;
-
-    console.log(filteredData);
-    const newUser = await User.create(req.body);
+    await User.create(req.body);
     res.status(201).json("success");
   } catch (error) {
     console.error(error);

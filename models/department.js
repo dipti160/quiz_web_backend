@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const { db } = require("../database");
+const Course = require("./course");
 
 const Department = db.define(
   "Department",
@@ -16,8 +17,12 @@ const Department = db.define(
   },
   {
     tableName: "departments",
+    timestamps: false,
   }
 );
+
+Department.hasMany(Course, { foreignKey: "department_id" });
+Course.belongsTo(Department, { foreignKey: "department_id" });
 
 // db.sync()
 //   .then(() => {

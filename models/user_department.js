@@ -1,19 +1,24 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const { db } = require("../database");
 
-const Department = require("../models/department");
+const User = require("./user");
+const Department = require("./department");
 
-const Course = db.define(
-  "Course",
+const UserDepartment = db.define(
+  "UserDepartment",
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
-      type: DataTypes.STRING,
+    user_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
     },
     department_id: {
       type: DataTypes.INTEGER,
@@ -25,24 +30,16 @@ const Course = db.define(
     },
   },
   {
-    tableName: "courses",
+    tableName: "user_department",
   }
 );
 
-// Course.belongsTo(Department, { foreignKey: "departmentId" });
-
-// Course.belongsTo(Department, {
-//   as: "Department",
-//   foreignKey: "department_id",
-// });
-
-// Course.belongsTo(Department, { as: "Department", foreignKey: "departmentId" });
 // db.sync()
 //   .then(() => {
-//     console.log("Course table created successfully");
+//     console.log("user_department table created successfully");
 //   })
 //   .catch((error) => {
 //     console.error("Error creating user table:", error);
 //   });
 
-module.exports = Course;
+module.exports = UserDepartment;
