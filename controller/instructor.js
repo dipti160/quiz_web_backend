@@ -1,3 +1,5 @@
+const Course = require("../models/course");
+const Department = require("../models/department");
 const User = require("../models/user");
 const UserCourse = require("../models/user_course");
 const UserDepartment = require("../models/user_department");
@@ -12,8 +14,6 @@ const createInstructor = async (req, res) => {
       course_id,
       department_id,
     } = req.body;
-
-    console.log(req.body);
 
     const user = await User.create({
       firstname,
@@ -38,15 +38,28 @@ const createInstructor = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-const listInstructor = async () => {
+
+const listInstructor = async (req, res) => {
   try {
     const instructors = await User.findAll({
       include: [
         {
           model: UserCourse,
+          include: [
+            {
+              model: Course,
+              attributes: ["name"],
+            },
+          ],
         },
         {
           model: UserDepartment,
+          include: [
+            {
+              model: Department,
+              attributes: ["name"],
+            },
+          ],
         },
       ],
       where: {
@@ -62,14 +75,25 @@ const listInstructor = async () => {
 
 const getInstructorById = async (req, res) => {
   try {
+    console.log("in getInstructorById");
     const instructorId = req.params.id;
     const instructor = await User.findByPk(instructorId, {
       include: [
         {
           model: UserCourse,
+          include: [
+            {
+              model: Course,
+            },
+          ],
         },
         {
           model: UserDepartment,
+          include: [
+            {
+              model: Department,
+            },
+          ],
         },
       ],
     });
@@ -108,11 +132,11 @@ const updateInstructor = async (req, res) => {
       });
       await UserCourse.update(
         { course_id },
-        { where: { UserId: instructorId } }
+        { where: { user_id: instructorId } }
       );
       await UserDepartment.update(
         { department_id },
-        { where: { UserId: instructorId } }
+        { where: { user_id: instructorId } }
       );
 
       res.status(200).json(updatedInstructor);
@@ -130,11 +154,11 @@ const deleteInstructor = async (req, res) => {
     const deletedInstructor = await User.findByPk(instructorId);
 
     if (deletedInstructor) {
-      await UserCourse.destroy({ where: { UserId: instructorId } });
-      await UserDepartment.destroy({ where: { UserId: instructorId } });
+      await UserCourse.destroy({ where: { user_id: instructorId } });
+      await UserDepartment.destroy({ where: { user_id: instructorId } });
       await deletedInstructor.destroy();
 
-      res.status(204).end();
+      res.status(200).json({ message: "Success" });
     } else {
       res.status(404).json({ error: "Instructor not found" });
     }

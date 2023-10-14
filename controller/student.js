@@ -1,29 +1,39 @@
-const { User } = require("../models/user"); // Import your Sequelize models
-const { UserCourse } = require("../models/user_course");
-const { UserDepartment } = require("../models/user_department");
+const Course = require("../models/course");
+const Department = require("../models/department");
+const User = require("../models/user");
+const UserCourse = require("../models/user_course");
+const UserDepartment = require("../models/user_department");
 
 const createStudent = async (req, res) => {
   try {
-    const { firstName, lastName, phoneNumber, email, courseId, departmentId } =
-      req.body;
+    const {
+      firstname,
+      lastname,
+      phone_number,
+      email,
+      course_id,
+      department_id,
+    } = req.body;
 
-    // Create the student
-    const student = await Student.create({
-      firstName,
-      lastName,
-      phoneNumber,
+    const user = await User.create({
+      firstname,
+      lastname,
+      phone_number,
       email,
       role: "student",
+      password: "test",
+    });
+    // Associate student with course and department
+    await UserCourse.create({
+      course_id: parseInt(course_id),
+      user_id: user.id,
+    });
+    await UserDepartment.create({
+      department_id: parseInt(department_id),
+      user_id: user.id,
     });
 
-    // Associate student with course and department
-    const course = await UserCourse.findByPk(courseId);
-    const department = await UserDepartment.findByPk(departmentId);
-
-    await student.addUserCourse(course);
-    await student.addUserDepartment(department);
-
-    res.status(201).json(student);
+    res.status(201).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -32,8 +42,27 @@ const createStudent = async (req, res) => {
 // Get all students
 const listStudents = async (req, res) => {
   try {
-    const students = await Student.findAll({
-      include: [UserCourse, UserDepartment],
+    const students = await User.findAll({
+      include: [
+        {
+          model: UserCourse,
+          include: [
+            {
+              model: Course,
+              attributes: ["name"],
+            },
+          ],
+        },
+        {
+          model: UserDepartment,
+          include: [
+            {
+              model: Department,
+              attributes: ["name"],
+            },
+          ],
+        },
+      ],
       where: {
         role: "student",
       },
@@ -51,9 +80,19 @@ const getStudentById = async (req, res) => {
       include: [
         {
           model: UserCourse,
+          include: [
+            {
+              model: Course,
+            },
+          ],
         },
         {
           model: UserDepartment,
+          include: [
+            {
+              model: Department,
+            },
+          ],
         },
       ],
     });
@@ -72,21 +111,38 @@ const getStudentById = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const studentId = req.params.id;
-    const { firstName, lastName, phoneNumber, email } = req.body;
+    const {
+      firstname,
+      lastname,
+      phone_number,
+      email,
+      course_id,
+      department_id,
+    } = req.body;
 
-    const student = await Student.findByPk(studentId);
+    const student = await User.findByPk(studentId);
 
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    student.firstName = firstName;
-    student.lastName = lastName;
-    student.phoneNumber = phoneNumber;
-    student.email = email;
-    await student.save();
+    if (student) {
+      await student.update({
+        firstname,
+        lastname,
+        phone_number,
+        email,
+      });
+      await UserCourse.update({ course_id }, { where: { user_id: studentId } });
+      await UserDepartment.update(
+        { department_id },
+        { where: { user_id: studentId } }
+      );
 
-    res.status(200).json(student);
+      res.status(200).json(student);
+    } else {
+      res.status(404).json({ error: "Student not found" });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -96,15 +152,17 @@ const updateStudent = async (req, res) => {
 const deleteStudent = async (req, res) => {
   try {
     const studentId = req.params.id;
+    const student = await User.findByPk(studentId);
 
-    const student = await Student.findByPk(studentId);
+    if (student) {
+      await UserCourse.destroy({ where: { user_id: studentId } });
+      await UserDepartment.destroy({ where: { user_id: studentId } });
+      await student.destroy();
 
-    if (!student) {
-      return res.status(404).json({ error: "Student not found" });
+      res.status(200).json({ message: "Success" });
+    } else {
+      res.status(404).json({ error: "Instructor not found" });
     }
-
-    await student.destroy();
-    res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

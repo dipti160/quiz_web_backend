@@ -21,9 +21,6 @@ const Department = db.define(
   }
 );
 
-Department.hasMany(Course, { foreignKey: "department_id" });
-Course.belongsTo(Department, { foreignKey: "department_id" });
-
 // db.sync()
 //   .then(() => {
 //     console.log("Department table created successfully");
