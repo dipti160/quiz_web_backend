@@ -3,9 +3,11 @@ const router = express.Router();
 
 const registerUserMiddleware = require("../middleware/user");
 const verifyToken = require("../middleware/auth");
-
-const { createUser } = require("../controller/user");
+// auth
+const { createUser } = require("../controller/admin/user");
 const { authenticateUser } = require("../controller/login");
+
+// admin
 const {
   createDepartment,
   listDepartments,
@@ -13,7 +15,7 @@ const {
   deleteDepartment,
   departmentId,
   getAllDepartments,
-} = require("../controller/department");
+} = require("../controller/admin/department");
 const {
   createCourse,
   listCourses,
@@ -21,21 +23,45 @@ const {
   updateCourse,
   deleteCourse,
   getCourseById,
-} = require("../controller/course");
+} = require("../controller/admin/course");
 const {
   createInstructor,
   listInstructor,
   getInstructorById,
   updateInstructor,
   deleteInstructor,
-} = require("../controller/instructor");
+} = require("../controller/admin/instructor");
 const {
   createStudent,
   listStudents,
   getStudentById,
   updateStudent,
   deleteStudent,
-} = require("../controller/student");
+} = require("../controller/admin/student");
+
+// Instructor role
+const {
+  createStudentByInstructor,
+  listStudentsByInstructor,
+  getStudentByIdByInstructor,
+  updateStudentByInstructor,
+  deleteStudentByInstructor,
+} = require("../controller/instructor/student");
+
+const {
+  createExam,
+  getExams,
+  getExamById,
+  updateExam,
+  deleteExam,
+} = require("../controller/instructor/exam");
+const {
+  createQuestion,
+  getquestions,
+  getQuestionById,
+  updateQuestion,
+  deleteQuestion,
+} = require("../controller/instructor/question");
 
 ////////////////////////////////// auth route
 router.post("/register", registerUserMiddleware, createUser);
@@ -71,5 +97,28 @@ router.get("/students", listStudents);
 router.get("/student/:id", getStudentById);
 router.put("/student/:id", updateStudent);
 router.delete("/student/:id", deleteStudent);
+
+// ///////////////////////////////////////// instructor role
+
+// student
+router.post("/instructor/student", createStudentByInstructor);
+router.get("/instructor/students/:id", listStudentsByInstructor);
+router.get("/instructor/get-student/:id", getStudentByIdByInstructor);
+router.put("/instructor/student/:id", updateStudentByInstructor);
+router.delete("/instructor/student/:id", deleteStudentByInstructor);
+
+// exam
+router.post("/instructor/exams", createExam);
+router.get("/instructor/exams/:id", getExams);
+router.get("/instructor/get-exams/:id", getExamById);
+router.put("/instructor/exams/:id", updateExam);
+router.delete("/instructor/exams/:id", deleteExam);
+
+// question
+router.post("/instructor/questions", createQuestion);
+router.get("/instructor/questions/:id", getquestions);
+router.get("/instructor/get-question/:id", getQuestionById);
+router.put("/instructor/questions/:id", updateQuestion);
+router.delete("/instructor/questions/:id", deleteQuestion);
 
 module.exports = router;

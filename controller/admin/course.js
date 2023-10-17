@@ -1,5 +1,5 @@
-const Course = require("../models/course");
-const Department = require("../models/department");
+const Course = require("../../models/course");
+const Department = require("../../models/department");
 
 // create a new department
 const createCourse = async (req, res) => {

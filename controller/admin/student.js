@@ -1,8 +1,8 @@
-const Course = require("../models/course");
-const Department = require("../models/department");
-const User = require("../models/user");
-const UserCourse = require("../models/user_course");
-const UserDepartment = require("../models/user_department");
+const Course = require("../../models/course");
+const Department = require("../../models/department");
+const User = require("../../models/user");
+const UserCourse = require("../../models/user_course");
+const UserDepartment = require("../../models/user_department");
 
 const createStudent = async (req, res) => {
   try {
@@ -161,7 +161,7 @@ const deleteStudent = async (req, res) => {
 
       res.status(200).json({ message: "Success" });
     } else {
-      res.status(404).json({ error: "Instructor not found" });
+      res.status(404).json({ error: "student not found" });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });

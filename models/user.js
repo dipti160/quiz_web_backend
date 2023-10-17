@@ -5,6 +5,7 @@ const UserCourse = require("./user_course");
 const UserDepartment = require("./user_department");
 const Course = require("./course");
 const Department = require("./department");
+const StudentInstructor = require("./student_instructor");
 
 const saltRounds = 10;
 const myPlaintextPassword = "s0//P4$$w0rD";
@@ -56,6 +57,10 @@ User.beforeCreate(async (user) => {
 
 User.hasMany(UserCourse, { foreignKey: "user_id" });
 User.hasMany(UserDepartment, { foreignKey: "user_id" });
+User.hasMany(StudentInstructor, {
+  foreignKey: "instructor_id",
+  foreignKey: "student_id",
+});
 
 UserCourse.belongsTo(Course, { foreignKey: "course_id" });
 UserDepartment.belongsTo(Department, { foreignKey: "department_id" });

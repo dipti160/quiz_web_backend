@@ -1,5 +1,5 @@
 const { Sequelize } = require("sequelize");
-const Department = require("../models/department");
+const Department = require("../../models/department");
 
 // create a new department
 const createDepartment = async (req, res) => {

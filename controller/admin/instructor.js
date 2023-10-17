@@ -1,8 +1,8 @@
-const Course = require("../models/course");
-const Department = require("../models/department");
-const User = require("../models/user");
-const UserCourse = require("../models/user_course");
-const UserDepartment = require("../models/user_department");
+const Course = require("../../models/course");
+const Department = require("../../models/department");
+const User = require("../../models/user");
+const UserCourse = require("../../models/user_course");
+const UserDepartment = require("../../models/user_department");
 
 const createInstructor = async (req, res) => {
   try {
