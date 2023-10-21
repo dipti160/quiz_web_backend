@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const Exam = require("../../models/exam");
 const ExamCourse = require("../../models/exam_course");
 const ExamUser = require("../../models/exam_user");
@@ -54,13 +55,21 @@ const createExam = async (req, res) => {
 const getExams = async (req, res) => {
   try {
     const { id } = req.params;
+    const today = new Date();
+    const fiveDaysLater = new Date();
+    fiveDaysLater.setDate(today.getDate() + 30);
+
     const exams = await Exam.findAll({
       where: {
         instructor_id: id,
+        startdate: {
+          [Op.between]: [today, fiveDaysLater],
+        },
       },
     });
     res.status(200).json(exams);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Error fetching exams" });
   }
 };
@@ -106,10 +115,39 @@ const deleteExam = async (req, res) => {
   }
 };
 
+const getPastExamsInstructor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const today = new Date();
+    const fifteenDaysAgo = new Date();
+    fifteenDaysAgo.setDate(today.getDate() - 15);
+
+    const exams = await Exam.findAll({
+      where: {
+        instructor_id: id,
+        [Op.or]: [
+          {
+            enddate: {
+              [Op.between]: [fifteenDaysAgo, today],
+            },
+          },
+          ,
+        ],
+      },
+    });
+
+    res.status(200).json(exams);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error fetching exams" });
+  }
+};
+
 module.exports = {
   createExam,
   getExams,
   getExamById,
   updateExam,
   deleteExam,
+  getPastExamsInstructor,
 };

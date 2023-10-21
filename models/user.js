@@ -6,6 +6,7 @@ const UserDepartment = require("./user_department");
 const Course = require("./course");
 const Department = require("./department");
 const StudentInstructor = require("./student_instructor");
+const ExamUser = require("./exam_user");
 
 const saltRounds = 10;
 const myPlaintextPassword = "s0//P4$$w0rD";
@@ -60,6 +61,9 @@ User.hasMany(UserDepartment, { foreignKey: "user_id" });
 User.hasMany(StudentInstructor, {
   foreignKey: "instructor_id",
   foreignKey: "student_id",
+});
+User.hasMany(ExamUser, {
+  foreignKey: "user_id",
 });
 
 UserCourse.belongsTo(Course, { foreignKey: "course_id" });

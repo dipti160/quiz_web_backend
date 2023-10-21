@@ -1,25 +1,12 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const { db } = require("../database");
-
 const Exam = require("./exam");
 const User = require("./user");
+const Question = require("./question");
 
-const ExamUser = db.define(
-  "ExamUser",
+const StudentResponse = db.define(
+  "StudentResponse",
   {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
-    },
     exam_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -28,21 +15,38 @@ const ExamUser = db.define(
         key: "id",
       },
     },
+    student_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
+    question_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Question,
+        key: "id",
+      },
+    },
+    selected_option_ids: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
   },
   {
-    tableName: "exam_user",
+    tableName: "student_responses",
   }
 );
 
-Exam.hasMany(ExamUser, { foreignKey: "exam_id" });
-ExamUser.belongsTo(Exam, { foreignKey: "exam_id" });
-
 // db.sync()
 //   .then(() => {
-//     console.log("exam_user table created successfully");
+//     console.log("student_responses table created successfully");
 //   })
 //   .catch((error) => {
 //     console.error("Error creating user table:", error);
 //   });
 
-module.exports = ExamUser;
+module.exports = StudentResponse;

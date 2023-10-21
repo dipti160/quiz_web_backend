@@ -3,6 +3,7 @@ const router = express.Router();
 
 const registerUserMiddleware = require("../middleware/user");
 const verifyToken = require("../middleware/auth");
+
 // auth
 const { createUser } = require("../controller/admin/user");
 const { authenticateUser } = require("../controller/login");
@@ -54,6 +55,7 @@ const {
   getExamById,
   updateExam,
   deleteExam,
+  getPastExamsInstructor,
 } = require("../controller/instructor/exam");
 const {
   createQuestion,
@@ -62,6 +64,30 @@ const {
   updateQuestion,
   deleteQuestion,
 } = require("../controller/instructor/question");
+
+// student role
+const {
+  getUpcomingExam,
+  getPastExams,
+  examQuestions,
+} = require("../controller/student/exam");
+const {
+  createStudentResponse,
+  createstudentDisqualified,
+} = require("../controller/student/exam_response");
+const {
+  coursesCount,
+  departmentsCount,
+  examsCount,
+  instructorCount,
+  studentCount,
+  examsUpcomingCount,
+  examsForDashboard,
+} = require("../controller/dashboard");
+const {
+  evaluateExamResult,
+  viewExamResults,
+} = require("../controller/instructor/result");
 
 ////////////////////////////////// auth route
 router.post("/register", registerUserMiddleware, createUser);
@@ -110,6 +136,7 @@ router.delete("/instructor/student/:id", deleteStudentByInstructor);
 // exam
 router.post("/instructor/exams", createExam);
 router.get("/instructor/exams/:id", getExams);
+router.get("/instructor/past-exams/:id", getPastExamsInstructor);
 router.get("/instructor/get-exams/:id", getExamById);
 router.put("/instructor/exams/:id", updateExam);
 router.delete("/instructor/exams/:id", deleteExam);
@@ -120,5 +147,28 @@ router.get("/instructor/questions/:id", getquestions);
 router.get("/instructor/get-question/:id", getQuestionById);
 router.put("/instructor/questions/:id", updateQuestion);
 router.delete("/instructor/questions/:id", deleteQuestion);
+
+// result
+router.post("/instructor/evaluateResult/:id", evaluateExamResult);
+router.get("/instructor/result/:id", viewExamResults);
+
+// ///////////////////////////////////////// student role
+
+// exam lists
+router.get("/student/upcoming-exams/:id", getUpcomingExam);
+router.get("/student/past-exams/:id", getPastExams);
+router.get("/student/:examId/questions", examQuestions);
+router.post("/student/exam/response", createStudentResponse);
+router.post("/student/exam/disqualified", createstudentDisqualified);
+
+////////////////////////////////////// dashboard
+
+router.get("/admin/courses/count", coursesCount);
+router.get("/admin/departments/count", departmentsCount);
+router.get("/admin/exams/count", examsCount);
+router.get("/admin/instructor/count", instructorCount);
+router.get("/admin/student/count", studentCount);
+router.get("/admin/exams/upcoming/count", examsUpcomingCount);
+router.get("/admin/exams/upcoming/all", examsForDashboard);
 
 module.exports = router;
