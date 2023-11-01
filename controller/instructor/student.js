@@ -17,6 +17,12 @@ const createStudentByInstructor = async (req, res) => {
       instructor_id,
     } = req.body;
 
+    const existingEmail = await User.findOne({ where: { email } });
+
+    if (existingEmail) {
+      return res.status(200).json({ email: "exist" });
+    }
+
     const user = await User.create({
       firstname,
       lastname,
@@ -40,7 +46,7 @@ const createStudentByInstructor = async (req, res) => {
       user_id: user.id,
     });
 
-    res.status(201).json(user);
+    res.status(201).json({ data: user });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -50,6 +56,9 @@ const createStudentByInstructor = async (req, res) => {
 const listStudentsByInstructor = async (req, res) => {
   try {
     const instructor_id = req.params.id;
+    const { page, limit } = req.query;
+    const offset = (page - 1) * limit;
+
     const students = await User.findAll({
       include: {
         model: StudentInstructor,
@@ -61,8 +70,22 @@ const listStudentsByInstructor = async (req, res) => {
       where: {
         role: "student",
       },
+      offset: offset,
+      limit: parseInt(limit),
+      order: [["createdAt", "DESC"]],
     });
-    res.status(200).json(students);
+
+    const totalStudents = await User.count({
+      where: { role: "student" },
+      include: {
+        model: StudentInstructor,
+        where: {
+          instructor_id: instructor_id,
+        },
+      },
+    });
+    const totalPages = Math.ceil(totalStudents / limit);
+    res.status(200).json({ data: students, totalPages: totalPages });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

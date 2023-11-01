@@ -1,7 +1,7 @@
 const Course = require("../../models/course");
 const Department = require("../../models/department");
 
-// create a new department
+// create a new course
 const createCourse = async (req, res) => {
   try {
     const { name, department_id } = req.body;
@@ -13,20 +13,43 @@ const createCourse = async (req, res) => {
   }
 };
 
-// list of all departments
+// list of all courses
 const listCourses = async (req, res) => {
   try {
+    const { page, limit, search } = req.query;
+    const offset = (page - 1) * limit;
+    let whereCondition = {};
+
     const courses = await Course.findAll({
+      where: whereCondition,
+      offset: offset,
+      limit: parseInt(limit),
+      order: [["createdAt", "DESC"]],
       include: [{ model: Department }],
     });
-    res.status(200).json(courses);
+    const totalCourses = await Course.count({
+      where: whereCondition,
+    });
+    const totalPages = Math.ceil(totalCourses / limit);
+
+    res.status(200).json({ data: courses, totalPages: totalPages });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-// get department by id
+const getAllcourses = async (req, res) => {
+  try {
+    const course = await Course.findAll();
+    res.status(200).json(course);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// get course by id
 const getCourseById = async (req, res) => {
   const courseId = req.params.id;
   try {
@@ -38,7 +61,7 @@ const getCourseById = async (req, res) => {
   }
 };
 
-// update department by id
+// update course by id
 const updateCourse = async (req, res) => {
   const courseId = req.params.id;
 
@@ -59,7 +82,7 @@ const updateCourse = async (req, res) => {
   }
 };
 
-//   delete department
+//   delete course
 
 const deleteCourse = async (req, res) => {
   const courseId = req.params.id;
@@ -81,6 +104,7 @@ const deleteCourse = async (req, res) => {
 module.exports = {
   createCourse,
   listCourses,
+  getAllcourses,
   getCourseById,
   deleteCourse,
   updateCourse,

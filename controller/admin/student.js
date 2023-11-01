@@ -42,6 +42,9 @@ const createStudent = async (req, res) => {
 // Get all students
 const listStudents = async (req, res) => {
   try {
+    const { page, limit } = req.query;
+    const offset = (page - 1) * limit;
+
     const students = await User.findAll({
       include: [
         {
@@ -66,8 +69,17 @@ const listStudents = async (req, res) => {
       where: {
         role: "student",
       },
+      offset: offset,
+      limit: parseInt(limit),
+      order: [["createdAt", "DESC"]],
     });
-    res.status(200).json(students);
+
+    const totalStudents = await User.count({
+      where: { role: "student" },
+    });
+    const totalPages = Math.ceil(totalStudents / limit);
+
+    res.status(200).json({ data: students, totalPages: totalPages });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

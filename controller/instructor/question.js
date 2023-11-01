@@ -15,6 +15,39 @@ const createQuestion = async (req, res) => {
       exam_id,
       instructor_id,
     } = req.body;
+
+    const examData = await Exam.findOne({
+      where: { id: exam_id },
+      attributes: ["totalmarks"],
+    });
+    const questionData = await Question.findAll({
+      attributes: ["marks"],
+      where: {
+        exam_id: exam_id,
+      },
+    });
+
+    const totalMarksFromQuestions = questionData.reduce(
+      (acc, question) => acc + question.dataValues.marks,
+      0
+    );
+    console.log(totalMarksFromQuestions, "totalMarksFromQuestions");
+
+    const calculatedTotalMarks =
+      parseInt(totalMarksFromQuestions) + parseInt(marks);
+
+    console.log(calculatedTotalMarks, "calculatedTotalMarks");
+    console.log(
+      examData.dataValues.totalmarks,
+      "examData.dataValues.totalmarks"
+    );
+
+    if (calculatedTotalMarks > examData.dataValues.totalmarks) {
+      return res
+        .status(200)
+        .json({ total: "Total marks exceed the allowed limit." });
+    }
+
     const question = await Question.create({
       questiontext,
       options,
@@ -25,7 +58,7 @@ const createQuestion = async (req, res) => {
       exam_id,
       instructor_id,
     });
-    return res.status(201).json(question);
+    return res.status(201).json({ data: question });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

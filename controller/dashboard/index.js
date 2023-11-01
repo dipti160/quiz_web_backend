@@ -31,7 +31,7 @@ const instructorCount = async (req, res) => {
 const studentCount = async (req, res) => {
   const count = await User.count({
     where: {
-      role: "instructor",
+      role: "student",
     },
   });
   res.json({ count });
@@ -39,14 +39,21 @@ const studentCount = async (req, res) => {
 
 const examsUpcomingCount = async (req, res) => {
   const today = new Date();
+  const localStartDate = today.toLocaleDateString("en-US", {
+    timeZone: "America/Los_Angeles",
+  });
   const tenDaysLater = new Date();
   tenDaysLater.setDate(today.getDate() + 5);
+
+  const localEndDateFormatted = tenDaysLater.toLocaleDateString("en-US", {
+    timeZone: "America/Los_Angeles",
+  });
 
   try {
     const count = await Exam.count({
       where: {
         startdate: {
-          [Op.between]: [today, tenDaysLater],
+          [Op.between]: [localStartDate, localEndDateFormatted],
         },
       },
     });

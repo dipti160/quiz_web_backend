@@ -24,6 +24,7 @@ const {
   updateCourse,
   deleteCourse,
   getCourseById,
+  getAllcourses,
 } = require("../controller/admin/course");
 const {
   createInstructor,
@@ -105,6 +106,7 @@ router.delete("/departments/:id", deleteDepartment);
 // course
 router.post("/course", createCourse);
 router.get("/courses", listCourses);
+router.get("/courses/all", getAllcourses);
 router.get("/course/:id", getCourseById);
 router.put("/course/:id", updateCourse);
 router.delete("/course/:id", deleteCourse);

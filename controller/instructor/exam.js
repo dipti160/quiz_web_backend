@@ -5,6 +5,9 @@ const ExamUser = require("../../models/exam_user");
 const Question = require("../../models/question");
 const StudentInstructor = require("../../models/student_instructor");
 
+const { db } = require("../../database");
+const StudentResult = require("../../models/student_result");
+
 const createExam = async (req, res) => {
   try {
     const {
@@ -54,19 +57,27 @@ const createExam = async (req, res) => {
 
 const getExams = async (req, res) => {
   try {
+    console.log("in getExams");
     const { id } = req.params;
     const today = new Date();
-    const fiveDaysLater = new Date();
-    fiveDaysLater.setDate(today.getDate() + 30);
+    const localStartDate = today.toLocaleDateString("en-US", {
+      timeZone: "America/Los_Angeles",
+    });
+    const localEndDate = new Date(today);
+    localEndDate.setDate(today.getDate() + 30);
+    const localEndDateFormatted = localEndDate.toLocaleDateString("en-US", {
+      timeZone: "America/Los_Angeles",
+    });
 
     const exams = await Exam.findAll({
       where: {
         instructor_id: id,
         startdate: {
-          [Op.between]: [today, fiveDaysLater],
+          [Op.between]: [localStartDate, localEndDateFormatted],
         },
       },
     });
+
     res.status(200).json(exams);
   } catch (error) {
     console.log(error);
@@ -136,7 +147,24 @@ const getPastExamsInstructor = async (req, res) => {
       },
     });
 
-    res.status(200).json(exams);
+    const examResults = await Promise.all(
+      exams.map(async (exam) => {
+        const result = await StudentResult.findOne({
+          where: {
+            exam_id: exam.id,
+          },
+        });
+
+        const hasResult = !!result;
+
+        return {
+          ...exam?.dataValues,
+          hasResult: hasResult,
+        };
+      })
+    );
+
+    res.status(200).json(examResults);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error fetching exams" });

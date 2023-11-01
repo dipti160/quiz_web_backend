@@ -15,6 +15,31 @@ const createInstructor = async (req, res) => {
       department_id,
     } = req.body;
 
+    const existingEmail = await User.findOne({ where: { email } });
+
+    if (existingEmail) {
+      return res.status(200).json({ email: "exist" });
+    }
+
+    const insdtructorFind = await User.findAll({
+      where: {
+        role: "instructor",
+      },
+
+      include: [
+        {
+          model: UserCourse,
+          where: {
+            course_id: course_id,
+          },
+        },
+      ],
+    });
+
+    if (insdtructorFind.length) {
+      return res.status(200).json({ course: "alreday assign" });
+    }
+
     const user = await User.create({
       firstname,
       lastname,
@@ -32,7 +57,7 @@ const createInstructor = async (req, res) => {
       user_id: user.id,
     });
 
-    res.status(201).json(user);
+    res.status(201).json({ data: user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -41,6 +66,9 @@ const createInstructor = async (req, res) => {
 
 const listInstructor = async (req, res) => {
   try {
+    const { page, limit } = req.query;
+    const offset = (page - 1) * limit;
+
     const instructors = await User.findAll({
       include: [
         {
@@ -65,8 +93,17 @@ const listInstructor = async (req, res) => {
       where: {
         role: "instructor",
       },
+      offset: offset,
+      limit: parseInt(limit),
+      order: [["createdAt", "DESC"]],
     });
-    res.status(200).json(instructors);
+
+    const totalInstructors = await User.count({
+      where: { role: "instructor" },
+    });
+    const totalPages = Math.ceil(totalInstructors / limit);
+
+    res.status(200).json({ data: instructors, totalPages: totalPages });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

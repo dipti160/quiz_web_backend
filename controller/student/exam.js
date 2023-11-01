@@ -11,8 +11,15 @@ const getUpcomingExam = async (req, res) => {
   try {
     const { id } = req.params;
     const today = new Date();
+    const localStartDate = today.toLocaleDateString("en-US", {
+      timeZone: "America/Los_Angeles",
+    });
+    const localEndDate = new Date(today);
     const fiveDaysLater = new Date();
     fiveDaysLater.setDate(today.getDate() + 5);
+    const localEndDateFormatted = fiveDaysLater.toLocaleDateString("en-US", {
+      timeZone: "America/Los_Angeles",
+    });
 
     const studentResponseExamIds = await StudentResponse.findAll({
       where: {
@@ -46,7 +53,7 @@ const getUpcomingExam = async (req, res) => {
           [Op.notIn]: existingExamIds,
         },
         startdate: {
-          [Op.between]: [today, fiveDaysLater],
+          [Op.between]: [localStartDate, localEndDateFormatted],
         },
       },
     });
@@ -107,14 +114,17 @@ const getPastExams = async (req, res) => {
           return acc + result.Result;
         }, 0);
 
+        const result = studentResults.length > 0 ? totalResult : "N/A";
+
         // Create an object with exam details and result field
         return {
           ...exams.find((exam) => exam.id === examId).toJSON(),
-          result: totalResult,
+          result: result,
         };
       })
     );
 
+    console.log(examsWithResults);
     res.status(200).json(examsWithResults);
   } catch (error) {
     console.log(error);

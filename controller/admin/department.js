@@ -5,6 +5,10 @@ const Department = require("../../models/department");
 const createDepartment = async (req, res) => {
   try {
     const { name } = req.body;
+    const existingDepartment = await Department.findOne({ where: { name } });
+    if (existingDepartment) {
+      return res.status(200).json();
+    }
     const department = await Department.create({ name });
     res.status(201).json(department);
   } catch (error) {
